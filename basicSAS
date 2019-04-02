@@ -1,0 +1,31 @@
+/* after you've imported the training and test sets */
+data test;
+set test;
+SalePrice = .;
+;
+
+data train2;
+set train test;
+run;
+
+proc glm data = train2 plots = all;
+class RoofStyle RoofMatl Exterior2st Exterior2nd MasVnrType;
+model SalePrice = RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType LotArea BedroomAbvGr YearBuilt / cli so
+output out = results p = Predict;
+run;
+
+/* Can't have negative predictions because of RMSLE */
+/* Also must have only two columns with appropriate labels. */
+
+data results2;
+set results;
+if Predict > 0 then Salerice = Predict;
+if Predict < 0 then SalePrice = 100000;
+keep id SalePrice;
+where id> 1460;
+;
+
+proc means data = results2;
+var SalePrice;
+run;
+ 
