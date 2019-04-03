@@ -33,6 +33,7 @@ data train2;
 set train test;
 run;
 
+/* keep getting an error saying that there are missing values, not sure why */
 proc glm data = train2 plots = all;
 class RoofStyle RoofMatl Exterior2st Exterior2nd MasVnrType;
 model SalePrice = RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType LotArea BedroomAbvGr YearBuilt / cli so
