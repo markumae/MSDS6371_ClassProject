@@ -1,3 +1,4 @@
+/*after importing and running both datasets, copy and paste this code into a new program to make tidy datasets */
 PROC SQL;
 	create table test as
 SELECT Neighborhood , GrLivArea FROM WORK.IMPORT WHERE Neighborhood IN ('NAmes', 'Edwards', 'BrkSide')
