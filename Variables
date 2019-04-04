@@ -1,177 +1,57 @@
+/*train file */
+%web_drop_table(WORK.IMPORT);
+FILENAME REFFILE '/folders/myfolders/Kaggle/Analysis1.csv';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=CSV
+	OUT=WORK.IMPORT;
+	GETNAMES=YES;
+RUN;
+PROC CONTENTS DATA=WORK.IMPORT; RUN;
+%web_open_table(WORK.IMPORT);
+
+
+/*test file */
+%web_drop_table(WORK.IMPORT1);
+FILENAME REFFILE '/folders/myfolders/Kaggle/testanalysis1.csv';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=CSV
+	OUT=WORK.IMPORT1;
+	GETNAMES=YES;
+RUN;
+
+PROC CONTENTS DATA=WORK.IMPORT1; RUN;
+%web_open_table(WORK.IMPORT1);
+
+/* identify data sets */
 data train;
-INFILE'/home/u36301678/Kaggle.Project/train.csv' DLM= ',' FIRSTOBS= 2;
-INPUT Id
-MSSubClass
-MSZoning $
-LotFrontage $
-LotArea
-Street $
-Alley $
-LotShape $
-LandContour $
-Utilities $
-LotConfig $
-LandSlope $
-Neighborhood $
-Condition1 $
-Condition2 $
-BldgType $
-HouseStyle $
-OverallQual
-OverallCond
-YearBuilt
-YearRemodAdd
-RoofStyle $
-RoofMatl $
-Exterior1st $
-Exterior2nd $
-MasVnrType $
-MasVnrArea $
-ExterQual $
-ExterCond $
-Foundation $
-BsmtQual $
-BsmtCond $
-BsmtExposure $
-BsmtFinType1 $
-BsmtFinSF1
-BsmtFinType2 $
-BsmtFinSF2
-BsmtUnfSF
-TotalBsmtSF
-Heating $
-HeatingQC $
-CentralAir $
-Electrical $
-1stFlrSF
-2ndFlrSF
-LowQualFinSF
-GrLivArea
-BsmtFullBath
-BsmtHalfBath
-FullBath
-HalfBath
-BedroomAbvGr
-KitchenAbvGr
-KitchenQual $
-TotRmsAbvGrd
-Functional $
-Fireplaces
-FireplaceQu $
-GarageType $
-GarageYrBlt $
-GarageFinish $
-GarageCars
-GarageArea
-GarageQual $
-GarageCond $
-PavedDrive $
-WoodDeckSF
-OpenPorchSF
-EnclosedPorch
-3SsnPorch
-ScreenPorch
-PoolArea
-PoolQC $
-Fence $
-MiscFeature $
-MiscVal
-MoSold
-YrSold
-SaleType $
-SaleCondition $
-SalePrice
-;
-RUN;
-
+	set work.import;
+	run;
 data test;
-INFILE'/home/u36301678/Kaggle.Project/test.csv' DLM= ',' FIRSTOBS= 2;
-INPUT Id
-MSSubClass
-MSZoning $
-LotFrontage $
-LotArea
-Street $
-Alley $
-LotShape $
-LandContour $
-Utilities $
-LotConfig $
-LandSlope $
-Neighborhood $
-Condition1 $
-Condition2 $
-BldgType $
-HouseStyle $
-OverallQual
-OverallCond
-YearBuilt
-YearRemodAdd
-RoofStyle $
-RoofMatl $
-Exterior1st $
-Exterior2nd $
-MasVnrType $
-MasVnrArea $
-ExterQual $
-ExterCond $
-Foundation $
-BsmtQual $
-BsmtCond $
-BsmtExposure $
-BsmtFinType1 $
-BsmtFinSF1
-BsmtFinType2 $
-BsmtFinSF2
-BsmtUnfSF
-TotalBsmtSF
-Heating $
-HeatingQC $
-CentralAir $
-Electrical $
-1stFlrSF
-2ndFlrSF
-LowQualFinSF
-GrLivArea
-BsmtFullBath
-BsmtHalfBath
-FullBath
-HalfBath
-BedroomAbvGr
-KitchenAbvGr
-KitchenQual $
-TotRmsAbvGrd
-Functional $
-Fireplaces
-FireplaceQu $
-GarageType $
-GarageYrBlt $
-GarageFinish $
-GarageCars
-GarageArea
-GarageQual $
-GarageCond $
-PavedDrive $
-WoodDeckSF
-OpenPorchSF
-EnclosedPorch
-3SsnPorch
-ScreenPorch
-PoolArea
-PoolQC $
-Fence $
-MiscFeature $
-MiscVal
-MoSold
-YrSold
-SaleType $
-SaleCondition $
-SalePrice
-;
-RUN;
+	set work.import1;
+	run;
+data test;
+	set test;
+	SalePrice = .;
+	run;
+	
+/*exploratory data analysis*/
+proc univariate data=train;
+class Neighborhood;
+run;
 
-PROC PRINT DATA=TRAIN; RUN;
-PROC PRINT DATA=test; RUN;
+ods graphics on / attrpriority=none;
+Title 'SalePrice by Neighborhood';
+proc sgplot data=train;
+ scatter y=SalePrice x=GrLivArea /group= Neighborhood markerattrs=(size=10px);
+ styleattrs datasymbols=(circle square star);
+run;
+
+proc glm data=train plots =all;
+class Neighborhood(ref = 'BrkSide');
+model SalePrice = GrLivArea | Neighborhood /solution;
+run;
 
 /* after you've imported the training and test sets */
 data test;
