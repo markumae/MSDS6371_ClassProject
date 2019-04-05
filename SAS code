@@ -38,7 +38,6 @@ data logtrain;
 	set train;
 	logGrLivArea = log(GrLivArea);
 	logSalePrice = log(SalePrice);
-	if id = 2872 then delete;
 	run;
 	
 /*exploratory data analysis*/
