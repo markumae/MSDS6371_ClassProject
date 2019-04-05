@@ -1,4 +1,5 @@
 /*train file */
+/* I pre-sorted the data to remove all but the three neighborhoods in question 1 */
 %web_drop_table(WORK.IMPORT);
 FILENAME REFFILE '/folders/myfolders/Kaggle/Analysis1.csv';
 
@@ -12,6 +13,7 @@ PROC CONTENTS DATA=WORK.IMPORT; RUN;
 
 
 /*test file */
+/* I pre-sorted the data to remove all neighborhoods but the 3 in question 1 */
 %web_drop_table(WORK.IMPORT1);
 FILENAME REFFILE '/folders/myfolders/Kaggle/testanalysis1.csv';
 
