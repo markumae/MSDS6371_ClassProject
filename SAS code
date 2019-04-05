@@ -27,19 +27,39 @@ PROC CONTENTS DATA=WORK.IMPORT1; RUN;
 /* identify data sets */
 data train;
 	set work.import;
+	/* Remove observations 524 and 1299 */
+	if id = 524 then delete;  
+	if id = 1299 then delete;
 	run;
-data test;
-	set work.import1;
-	run;
-data test;
-	set test;
-	SalePrice = .;
+proc print data=train; run;
+
+/*log transformation due to outliers */
+data logtrain;
+	set train;
+	logGrLivArea = log(GrLivArea);
+	logSalePrice = log(SalePrice);
+	if id = 2872 then delete;
 	run;
 	
 /*exploratory data analysis*/
 proc univariate data=train;
-class Neighborhood;
+var SalePrice GrLivArea;
 run;
+
+/* frequency table to show size of neighborhoods in dataset */
+proc freq data= train;
+	tables Neighborhood
+	/plots=freqplot;
+	run;
+/*boxplots of saleprice by neighborhood*/
+proc sgplot data=train;
+hbox SalePrice / category=Neighborhood;
+run;
+/*boxplots of GrLivArea by neighborhood */
+proc sgplot data= train;
+hbox GrLivArea / category= Neighborhood;
+run;
+
 
 ods graphics on / attrpriority=none;
 Title 'SalePrice by Neighborhood';
@@ -51,6 +71,12 @@ run;
 proc glm data=train plots =all;
 class Neighborhood(ref = 'BrkSide');
 model SalePrice = GrLivArea | Neighborhood /solution;
+run;
+
+/* lm for log transformed data */
+proc glm data=logtrain plots =all;
+class Neighborhood(ref = 'BrkSide');
+model logSalePrice = logGrLivArea | Neighborhood /solution;
 run;
 
 /* after you've imported the training and test sets */
