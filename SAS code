@@ -43,8 +43,14 @@ data logtrain;
 	run;
 	
 /*exploratory data analysis*/
-proc univariate data=train;
-var SalePrice GrLivArea;
+proc univariate data=logtrain;
+var SalePrice logSalePrice;
+histogram SalePrice logSalePrice;
+run;
+
+proc univariate data=logtrain;
+var GrLivArea logGrLivArea;
+histogram GrLivArea logGrLivArea;
 run;
 
 /* frequency table to show size of neighborhoods in dataset */
