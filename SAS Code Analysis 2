@@ -1,12 +1,12 @@
 /*recoding 17 char variables as num as stated in e-mail*/
-
 data combine8;
 	set combine7;
-	if BldgType = '1Fam' then BldgTYpe = 1;
-	if BldgType = '2FmCon' then BldgTYpe = 2;
-	if BldgType = 'Duplex' then BldgTYpe = 3;
-	if BldgType = 'TwnhsE' then BldgTYpe = 4;
-	if BldgType = 'TwnHsI' then BldgTYpe = 5;
+	if BldgType = '1Fam' then BldgType = 1;
+	if BldgType = '2fmCon' then BldgType = 2;
+	if BldgType = 'Duplex' then BldgType = 3;
+	if BldgType = 'TwnhsE' then BldgType = 4;
+	if BldgType = 'TwnHsI' then BldgType = 5;
+	if BldgType = 'Twnhs' then BldgType = 6;
 	
 	if MSZoning = 'A' then MSZoning = 1;
 	if MSZoning = 'C' then MSZoning = 2;
@@ -20,8 +20,8 @@ data combine8;
 	if Street = 'Grvl' then Street = 0;
 	if Street = 'Pave' then Street = 1;
 	
-	if Alley = 'Grvl' then Alley = 0;
-	if Alley = 'Pave' then Alley = 1;
+	if Alley = 'Gr' then Alley = 0;
+	if Alley = 'Pa' then Alley = 1;
 	if Alley = 'NA' then Alley = 3;
 	
 	if LotShape = 'Reg' then LotShape = 1;
@@ -29,10 +29,10 @@ data combine8;
 	if LotShape = 'IR2' then LotShape = 3;
 	if LotShape = 'IR3' then LotShape = 4;
 
-	if LotContour = 'Lvl' then LotContour = 1;
-	if LotContour = 'Bnk' then LotContour = 2;
-	if LotContour = 'HLS' then LotContour = 3;
-	if LotContour = 'Low' then LotContour = 4;
+	if LandContour = 'Lvl' then LandContour = 1;
+	if LandContour = 'Bnk' then LandContour = 2;
+	if LandContour = 'HLS' then LandContour = 3;
+	if LandContour = 'Low' then LandContour = 4;
 	
 	if Utilities = 'AllPub' then Utilities = 1;
 	if Utilities = 'NoSewr' then Utilities = 2;
@@ -91,7 +91,7 @@ data combine8;
 	if RoofMatl = 'Metal' then RoofMatl = 4;
 	if RoofMatl = 'Roll' then RoofMatl = 5;
 	if RoofMatl = 'Tar&Grv' then RoofMatl = 6;
-	if RoofMatl = 'WdShake' then RoofMatl = 7;
+	if RoofMatl = 'WdShngl' then RoofMatl = 7;
 	if RoofMatl = 'CsShngl' then RoofMatl = 8;
 	
 	if Exterior1st = 'AsbShng' then Exterior1st = 1;
@@ -109,15 +109,15 @@ data combine8;
 	if Exterior1st = 'Stone' then Exterior1st = 13;
 	if Exterior1st = 'Stucco' then Exterior1st = 14;
 	if Exterior1st = 'VinylSd' then Exterior1st = 15;
-	if Exterior1st = 'Wd Sdng' then Exterior1st = 16;
-	if Exterior1st = 'WdShing' then Exterior1st = 17;
+	if Exterior1st = 'WdShing' then Exterior1st = 16;
+	if Exterior1st = 'Wd Sdng' then Exterior1st = 17;
 	
 	if Exterior2nd = 'AsbShng' then Exterior2nd = 1;
 	if Exterior2nd = 'sphShn' then Exterior2nd = 2;
 	if Exterior2nd = 'BrkComm' then Exterior2nd = 3;
 	if Exterior2nd = 'BrkFace' then Exterior2nd = 4;
 	if Exterior2nd = 'CBlock' then Exterior2nd = 5;
-	if Exterior2nd = 'CemntBd' then Exterior2nd = 6;
+	if Exterior2nd = 'CmentBd' then Exterior2nd = 6;
 	if Exterior2nd = 'HdBoard' then Exterior2nd = 7;
 	if Exterior2nd = 'ImStucc' then Exterior2nd = 8;
 	if Exterior2nd = 'MetalSd' then Exterior2nd = 9;
@@ -127,8 +127,8 @@ data combine8;
 	if Exterior2nd = 'Stone' then Exterior2nd = 13;
 	if Exterior2nd = 'Stucco' then Exterior2nd = 14;
 	if Exterior2nd = 'VinylSd' then Exterior2nd = 15;
-	if Exterior2nd = 'Wd Sdng' then Exterior2nd = 16;
-	if Exterior2nd = 'WdShing' then Exterior2nd = 17;
+	if Exterior2nd = 'Wd Shng' then Exterior2nd = 16;
+	if Exterior2nd = 'Wd Sdng' then Exterior2nd = 17;
 	
 	if MasVnrType = 'None' then MasVnrType = 0;
 	if MasVnrType = 'BrkCmn' then MasVnrType = 1;
@@ -136,12 +136,11 @@ data combine8;
 	if MasVnrType = 'CBlock' then MasVnrType = 3;	
 	if MasVnrType = 'Stone' then MasVnrType = 4;
 run;
-/*had a problem with variable LotConfig where SAS says it can't find it in the previous set, but can't figure out why */
-/*checked combine8 and LotConfig is there, not misspelled. */
+
 
 data combine9;
 	set combine8 (rename=(MSZoning=MSZoning_num Street=Street_num Alley=Alley_num LotShape=LotShape_num LandContour=LandContour_num
-	Utilities=Utilities_num LotConfig=LotConfig_num BldgType=BldgType_num LotConfig=LotConfig_num Landslope=Landslope_num
+	Utilities=Utilities_num  BldgType=BldgType_num LandConfig=LandConfig_num Landslope=Landslope_num
 	Condition1=Condition1_num Condition2=Condition2_num HouseStyle=HouseStyle_num Roofstyle=Roofstyle_num RoofMatl=RoofMatl_num 
 	Exterior1st=Exterior1st_num Exterior2nd=Exterior2nd_num MasVnrType=MasVnrType_num));
 	MSZoning = input(MSZoning_num, 6.);
@@ -150,7 +149,6 @@ data combine9;
 	LotShape = input(LotShape_num, 6.);
 	LandContour = input(LandContour_num, 6.);
 	Utilities = input(Utilities_num, 6.);
-	LotConfig = input(LotConfig_num, 6.);
 	BldgType = input(BldgType_num, 6.);
 	LotConfig = input(LotConfig_num, 6.);
 	Landslope = input(Landslope_num, 6.);
@@ -163,7 +161,6 @@ data combine9;
 	Exterior2nd = input(Exterior2nd_num, 6.);
 	MasVnrType = input(MasVnrType_num, 6.);
 	
-	
-	drop MSZoning_num Street_num Alley_num LotShape_num LandContour_num Utilities_num LotConfig_num BldgType_num LotConfig_num Landslope_num
-	Condition1_num Condition2_num Houstyle_num Roofstyle_num RoofMat1_num Exterior1st_num Exterior2nd_num MasVnrType_num;
+	drop MSZoning_num Street_num Alley_num LotShape_num LandContour_num Utilities_num  BldgType_num LotConfig_num Landslope_num
+	Condition1_num Condition2_num HouseStyle_num Roofstyle_num RoofMat1_num Exterior1st_num Exterior2nd_num MasVnrType_num;
 	run;
