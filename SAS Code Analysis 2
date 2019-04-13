@@ -1,26 +1,47 @@
-PROC IMPORT DATAFILE='/home/u36301678/Kaggle.Project/train.csv'
+PROC IMPORT DATAFILE='             '
 		    OUT=train
 		    DBMS=CSV
 		    REPLACE;
+		    guessingrows=max;
 RUN;
 
 /*clean data */
 data train2;
-set train;
-if  LotFrontage = "NA" then lotFrontage = 0;
-if  MasVnrArea = "NA" then MasVnrArea = 0;
-if GarageYrBlt = "NA" then GarageYrBlt = YearBuilt;
-run;
-
-data train3;
-  set train2 (rename=(LotFrontage = LotFrontage_char)) ;
-  LotFrontage = input(LotFrontage_char,6.);
-  drop LotFrontage_char;
+	set train (rename=(BsmtFinSF1 = BsmtFinSF1_Num BsmtFinSF2 = BsmtFinSF2_Num 
+   BsmtUnfSF=BsmtUnfSF_Num TotalBsmtSF=TotalBsmtSF_Num BsmtFullBath=BsmtFullBath_Num
+   BsmtHalfBath=BsmtHalfBath_Num GarageCars=GarageCars_Num GarageArea=GarageArea_Num
+   MasVnrArea = MasVnrArea_num GarageYrBlt = GarageYrBlt_num LotFrontage = LotFrontage_num)) ;
+   BsmtFinSF1 = input(BsmtFinSF1_Num,8.);
+   BsmtFinSF2 = input(BsmtFinSF2_Num,8.);
+   BsmtUnfSF = input(BsmtUnfSF_Num,8.);
+   TotalBsmtSF = input(TotalBsmtSF_Num,8.);
+   BsmtFullBath = input(BsmtFullBath_Num,8.);
+   BsmtHalfBath = input(BsmtHalfBath_Num,8.);
+   GarageCars = input(GarageCars_Num,8.);
+   GarageArea = input(GarageArea_Num,8.);
+   MasVnrArea = input(MasVnrArea_num, 8.);
+   GarageYrBlt = input(GarageYrBlt, 8.);
+   LotFrontage = input(LotFrontage_num, 8.);
+  drop BsmtFinSF1_Num BsmtFinSF2_Num BsmtUnfSF_Num TotalBsmtSF_Num BsmtFullBath_Num
+  BsmtHalfBath_Num GarageCars_Num GarageArea_Num MasVnrArea_num LotFrontage_num;
+	if  LotFrontage = "NA" then LotFrontage = 0;
+	if  MasVnrArea = "NA" then MasVnrArea = 0;
+	if GarageYrBlt = "NA" then GarageYrBlt = YearBuilt;
+	if GarageCars < 0 then GarageCars = 0;
+	if GarageArea < 0 then GarageArea = 0;
+	if BsmtFinSF1 < 0 then BsmtFinSF1 = 0;
+	if BsmtFinSF2 < 0 then BsmtFinSF2 = 0;
+	if TotalBsmtSF < 0 then TotalBsmtSF = 0;
+	if BsmtUnfSF < 0 then BsmtUnfSF = 0;
+	if BsmtFullBath < 0 then BsmtFullBath = 0;
+	if BsmtHalfBath < 0 then BsmtHalfBath = 0;
+	if Functional = "Min" then Functional = "Min_";
+	if Functional = "NA" then Functional = "Maj2";
 run;
 
 /*removing outliers */
-data train4;
-   set train3;
+data train3;
+   set train2;
   if id = "1299" then delete;
   if id = "524" then delete;
   if id = '1183' then delete;
@@ -30,8 +51,8 @@ data train4;
 run;
 
 /* log transformations */
-data train5;
-set train4;
+data train4;
+set train3;
 logSalePrice=log(SalePrice+1);
 lLotArea = log(LotArea+1);
 lLotFrontage = log(LotFrontage+1);
@@ -56,10 +77,10 @@ GrLivArea2 = GrLivArea**2;
 run;
 
 /*removed MSSubclass */
-proc glmselect data=train5 plots=all;
+proc glmselect data=train4 plots=all;
 Class MSZoning Street LotShape LandContour Utilities LotConfig LandSlope Neighborhood
  Condition1 Condition2 BldgType HouseStyle RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType Foundation
- BsmtExposure BsmtFinType1 BsmtFinType2 Heating CentralAir Electrical Functional GarageType GarageFinish
+ BsmtExposure BsmtFinType1 BsmtFinType2 Heating CentralAir Electrical Functional GarageType GarageFinish GarageYrBlt
  PavedDrive PoolQC Fence MiscFeature SaleType SaleCondition;
 model logSalePrice = GrLivArea2 lLotFrontage lLotArea OverallQual OverallCond YearBuilt YearRemodAdd lMasVnrArea BsmtFinSF1 BsmtFinSF2 
 lTotalBsmtSF l_1stFlrSF l_2ndFlrSF LowQualFinSF lGrLivArea BsmtFullBath BsmtHalfBath FullBath HalfBath BedroomAbvGr KitchenAbvGr
@@ -70,28 +91,55 @@ lTotalBsmtSF l_1stFlrSF l_2ndFlrSF LowQualFinSF lGrLivArea BsmtFullBath BsmtHalf
  Fence MiscFeature SaleType SaleCondition/selection= Stepwise(stop = CV) cvMethod=split(5);
 run;
 
-PROC IMPORT DATAFILE='/home/u36301678/Kaggle.Project/test.csv'
+PROC IMPORT DATAFILE='                  '
 		    OUT=test
 		    DBMS=CSV
 		    REPLACE;
+		    GUESSINGROWS=MAX;
 RUN;
 
 /*clean test data */
 data test2;
-set test;
-if  LotFrontage = "NA" then lotFrontage = 0;
-if  MasVnrArea = "NA" then MasVnrArea = 0;
-if GarageYrBlt = "NA" then GarageYrBlt = YearBuilt;
-run;
-data test3;
-   set test2 (rename=(LotFrontage = LotFrontage_char)) ;
-  LotFrontage = input(LotFrontage_char,6.);
+	set test (rename=(BsmtFinSF1 = BsmtFinSF1_Num BsmtFinSF2 = BsmtFinSF2_Num 
+   BsmtUnfSF=BsmtUnfSF_Num TotalBsmtSF=TotalBsmtSF_Num BsmtFullBath=BsmtFullBath_Num
+   BsmtHalfBath=BsmtHalfBath_Num GarageCars=GarageCars_Num GarageArea=GarageArea_Num
+   MasVnrArea = MasVnrArea_num GarageYrBlt = GarageYrBlt_num LotFrontage = LotFrontage_num)) ;
+   BsmtFinSF1 = input(BsmtFinSF1_Num,8.);
+   BsmtFinSF2 = input(BsmtFinSF2_Num,8.);
+   BsmtUnfSF = input(BsmtUnfSF_Num,8.);
+   TotalBsmtSF = input(TotalBsmtSF_Num,8.);
+   BsmtFullBath = input(BsmtFullBath_Num,8.);
+   BsmtHalfBath = input(BsmtHalfBath_Num,8.);
+   GarageCars = input(GarageCars_Num,8.);
+   GarageArea = input(GarageArea_Num,8.);
+   MasVnrArea = input(MasVnrArea_num, 8.);
+   GarageYrBlt = input(GarageYrBlt, 8.);
+   LotFrontage = input(LotFrontage_num, 8.);
+  drop BsmtFinSF1_Num BsmtFinSF2_Num BsmtUnfSF_Num TotalBsmtSF_Num BsmtFullBath_Num
+  BsmtHalfBath_Num GarageCars_Num GarageArea_Num MasVnrArea_num LotFrontage_num;
+
+	if  LotFrontage = "NA" then LotFrontage = 0;
+	if  MasVnrArea = "NA" then MasVnrArea = 0;
+	if GarageYrBlt = "NA" then GarageYrBlt = YearBuilt;
+	if GarageCars < 0 then GarageCars = 0;
+	if GarageArea < 0 then GarageArea = 0;
+	if BsmtFinSF1 < 0 then BsmtFinSF1 = 0;
+	if BsmtFinSF2 < 0 then BsmtFinSF2 = 0;
+	if TotalBsmtSF < 0 then TotalBsmtSF = 0;
+	if BsmtUnfSF < 0 then BsmtUnfSF = 0;
+	if BsmtFullBath < 0 then BsmtFullBath = 0;
+	if BsmtHalfBath < 0 then BsmtHalfBath = 0;
+	if Functional = "Min" then Functional = "Min_";
+	if Functional = "NA" then Functional = "Maj2";
+	if MSZoning = "NA" and Neighborhood = "IDOTRR"
+		then MSZoning = "RM";
+		else if MSZoning = "NA" then MSZoning = "RL";
 run;
 
 /* log transformations for test data */
-data test4;
-set test3;
-logSalePrice=log(SalePrice+1);
+data test3;
+set test2;
+/* logSalePrice=log(SalePrice+1); */
 lLotArea = log(LotArea+1);
 lLotFrontage = log(LotFrontage+1);
 lMasVnrArea = log(MasVnrArea+1);
@@ -115,22 +163,49 @@ GrLivArea2 = GrLivArea**2;
 run;
 
 /* Add SalePrice with blank values */
-data test5;
-set test4;
+data test4;
+set test3;
 SalePrice=.;
+run;
 
 /* Combine train and Test */
 data combine;
-set train5 test5;
+set train4 test4;
 run;
 
-proc freq data=train5;
+proc sql;
+	create table modes as 
+	SELECT DISTINCT id, exterior1st, exterior2nd, neighborhood
+	FROM combine
+	WHERE NEIGHBORHOOD IN ('Edwards');
+quit;
+
+proc sql;
+	create table modeMSZoning as
+	SELECT Neighborhood, MSZoning, COUNT(MSZoning) as MSZoningMode
+	FROM combine
+	GROUP BY Neighborhood, MSZoning;
+quit;
+
+proc sql;
+	create table MSZoningCount as
+	SELECT MSZoning, Count(MSZoning) as Mode
+	from combine
+	GROUP BY MSZoning;
+quit;
+	
+
+proc univariate data= combine modes;
+var MSZoning;
+run;
+
+
 
 /* removed MSSubClass, Utilities added GrLivArea2 for improved RMSE*/
 proc glmselect data=train5 plots=all;
 Class MSZoning Street LotShape LandContour LotConfig LandSlope Neighborhood
  Condition1 Condition2 BldgType HouseStyle RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType Foundation
- BsmtExposure BsmtFinType1 BsmtFinType2 Heating CentralAir Electrical Functional GarageType GarageFinish
+ BsmtExposure BsmtFinType1 BsmtFinType2 Heating CentralAir Electrical Functional GarageType GarageFinish GaragrYrBlt
  PavedDrive PoolQC Fence MiscFeature SaleType SaleCondition;
 model logSalePrice = GrLivArea2 lLotFrontage lLotArea OverallQual OverallCond YearBuilt YearRemodAdd lMasVnrArea BsmtFinSF1 BsmtFinSF2 
 lTotalBsmtSF l_1stFlrSF l_2ndFlrSF LowQualFinSF lGrLivArea BsmtFullBath BsmtHalfBath FullBath HalfBath BedroomAbvGr KitchenAbvGr
@@ -145,15 +220,15 @@ proc glmselect data=combine plots=all;
 Class MSZoning Street LotShape LandContour LotConfig LandSlope Neighborhood
  Condition1 Condition2 BldgType HouseStyle RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType Foundation
  BsmtExposure BsmtFinType1 BsmtFinType2 Heating CentralAir Electrical Functional GarageType GarageFinish
- PavedDrive PoolQC Fence MiscFeature SaleType SaleCondition;
+ PavedDrive PoolQC Fence MiscFeature SaleType SaleCondition GarageYrBlt;
 model logSalePrice = GrLivArea2 lLotFrontage lLotArea OverallQual OverallCond lYearBuilt lYearRemodAdd lMasVnrArea lBsmtFinSF1 lBsmtFinSF2 
-lTotalBsmtSF l_1stFlrSF l_2ndFlrSF LowQualFinSF lGrLivArea BsmtFullBath BsmtHalfBath lFullBath lHalfBath BedroomAbvGr KitchenAbvGr
+ lTotalBsmtSF l_1stFlrSF l_2ndFlrSF LowQualFinSF lGrLivArea BsmtFullBath BsmtHalfBath lFullBath lHalfBath BedroomAbvGr KitchenAbvGr
  TotRmsAbvGrd Fireplaces GarageYrBlt GarageCars lGarageArea lWoodDeckSF lOpenPorchSF lEnclosedPorch l_3SsnPorch lScreenPorch PoolArea
- MiscVal MoSold YrSold | MSZoning Street LotShape LandContour LotConfig LandSlope Neighborhood 
- Condition1 Condition2 BldgType HouseStyle RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType Foundation BsmtExposure
+ MiscVal MoSold YrSold | MSZoning Street LotShape LandContour /*LotConfig LandSlope*/ Neighborhood
+ /*Condition1 Condition2*/ BldgType HouseStyle RoofStyle RoofMatl /* Exterior1st Exterior2nd */ MasVnrType Foundation BsmtExposure 
  BsmtFinType1 BsmtFinType2 Heating CentralAir Electrical Functional GarageType GarageFinish PavedDrive PoolQC
- Fence MiscFeature SaleType SaleCondition/selection= forward(select = cv choose = cv stop = cv) CVDETAILS; 
-   output out=results p=Predict;
+ Fence MiscFeature SaleType SaleCondition /selection= forward(select = cv choose = cv stop = cv) CVDETAILS; 
+   output out=resultsforward p=Predict;
 run;
 
 /* Can't have  negative prediciton values */
