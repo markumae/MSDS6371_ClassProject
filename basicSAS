@@ -1,0 +1,57 @@
+/*after importing and running both datasets, copy and paste this code into a new program to make tidy datasets */
+PROC SQL;
+	create table test as
+SELECT Neighborhood , GrLivArea FROM WORK.IMPORT WHERE Neighborhood IN ('NAmes', 'Edwards', 'BrkSide')
+ORDER BY Neighborhood;
+QUIT;
+
+PROC SQL;
+	create table train as
+SELECT Neighborhood , GrLivArea FROM WORK.IMPORT2 WHERE Neighborhood IN ('NAmes', 'Edwards', 'BrkSide')
+ORDER BY Neighborhood;
+QUIT;
+
+proc print data=test; run;
+proc print data=train; run;
+/* after you've imported the training and test sets */
+data test;
+set test;
+SalePrice = .;
+;
+
+data train2;
+set train test;
+run;
+
+/* after you've imported the training and test sets */
+data test;
+set test;
+SalePrice = .;
+;
+
+data train2;
+set train test;
+run;
+
+/* keep getting an error saying that there are missing values, not sure why */
+proc glm data = train2 plots = all;
+class RoofStyle RoofMatl Exterior2st Exterior2nd MasVnrType;
+model SalePrice = RoofStyle RoofMatl Exterior1st Exterior2nd MasVnrType LotArea BedroomAbvGr YearBuilt / cli so
+output out = results p = Predict;
+run;
+
+/* Can't have negative predictions because of RMSLE */
+/* Also must have only two columns with appropriate labels. */
+
+data results2;
+set results;
+if Predict > 0 then Salerice = Predict;
+if Predict < 0 then SalePrice = 100000;
+keep id SalePrice;
+where id> 1460;
+;
+
+proc means data = results2;
+var SalePrice;
+run;
+ 
